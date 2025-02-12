@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from 'react'; 
 
 // import { ContextStore } from "../store/context";
-
+import { FirebaseContextStore } from "../store/firebaseContext";
 
 import { View, Text, TextInput, TouchableOpacity, Share, StyleSheet} from 'react-native'; 
 import QRCode from 'react-native-qrcode-svg'; 
@@ -17,9 +17,10 @@ export default function GenerateQR() {
     const qrCodeRef = useRef(null);
     let [students, setStudents] = useState([]);
 
-    // const contextStore = useContext(ContextStore);
-    // console.log("GenerateQR " + contextStore.user);
-    //console.log(students);
+    const firebaseContextStore = useContext(FirebaseContextStore);
+    const { user } = firebaseContextStore;
+
+    console.log("GenerateQR ", user ? user.email : "No user logged in");
 
     //Permission to acces media or gallery.
     useEffect(() => {

@@ -2,16 +2,19 @@ import { Alert, Button, Text, View, StyleSheet, Pressable, ImageBackground } fro
 import * as Location from 'expo-location';
 
 import { useState, useEffect, useContext } from "react";
-import { ContextStore } from "../store/context";
+import { FirebaseContextStore } from "../store/firebaseContext";
 
 
 import Pattern from "../assets/bg_image.jpg";
 
 
 export default function PostComp(){
-    // const { user } = route.params || {}; // Add a fallback to avoid undefined errors
+  
     const [location, seLocation] = useState(null)
-     const contextStore = useContext(ContextStore);
+    const firebaseContextStore = useContext(FirebaseContextStore);
+    const { user } = firebaseContextStore;
+
+    console.log("PostComp ", user ? user.email : "No user logged in");
 
     useEffect(() => {
         getLocation();
@@ -43,9 +46,9 @@ export default function PostComp(){
                 resizeMode='cover'
                 style={styles.container}
             >
-                <Text>
-                    {/* Welcome {contextStore.userName}! */}
-                    {/* <Text>{user ? user : 'No user logged in'}</Text> */}
+                <Text style={{fontSize:20}}>
+                    {/* Welcome {user.email} */}
+                    Welcome {user ? user.email : "No user logged in"}
                 </Text>
                 
             <Pressable 
