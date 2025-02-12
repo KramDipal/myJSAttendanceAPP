@@ -1,8 +1,12 @@
-import { Alert, Button, Text, View, StyleSheet, Pressable, ImageBackground } from "react-native";
+import { Alert, Button, Text, View, StyleSheet, 
+    Pressable, ImageBackground } from "react-native";
 import * as Location from 'expo-location';
+
+import { signOutWithMsg } from "../auth/signOut";
 
 import { useState, useEffect, useContext } from "react";
 import { FirebaseContextStore } from "../store/firebaseContext";
+import  { ContextStoreAPI } from "../store/contextAPI";
 
 
 import Pattern from "../assets/bg_image.jpg";
@@ -14,7 +18,11 @@ export default function PostComp(){
     const firebaseContextStore = useContext(FirebaseContextStore);
     const { user } = firebaseContextStore;
 
+    const contextStoreAPI = useContext(ContextStoreAPI);
+    const { apiName } = contextStoreAPI;
+
     console.log("PostComp ", user ? user.email : "No user logged in");
+    console.log("PostComp ", user ? user.uid : "No user logged in");
 
     useEffect(() => {
         getLocation();
@@ -39,6 +47,15 @@ export default function PostComp(){
         seLocation(location)
     }
 
+    // const signOutWithMsg = async (user) => {
+    //     Alert.alert('Goodbye! ' + (user ? user.email : 'User'));
+    //     try {
+    //       await AUTH.signOut();
+    //     } catch (error) {
+    //       console.error('Error signing out: ', error);
+    //     }
+    //   };
+
     return(
         <>
             <ImageBackground
@@ -50,10 +67,17 @@ export default function PostComp(){
                     {/* Welcome {user.email} */}
                     Welcome {user ? user.email : "No user logged in"}
                 </Text>
+
+                <Text style={{fontSize:20, marginBottom:10}}>
+                    User ID: {user ? user.uid : "No user logged in"}
+                </Text>
+
+                <Text style={{fontSize:20}}>
+                    API Name: {apiName}
+                </Text>
                 
             <Pressable 
                 style={styles.button}
-
                 //change the test user of context provider
                 // onPress={()=>Alert.alert('pressd')}
                 // onPress={()=>contextStore.changeUserName('lapid kiko')}
@@ -67,6 +91,17 @@ export default function PostComp(){
                 // onPress={()=>QrCodeReader()}
             >
                 <Text>Scan QR Code</Text>
+            </Pressable>
+
+
+            {/* log out Button */}
+            <Pressable 
+                style={styles.button}
+                onPress={()=>signOutWithMsg(user)}
+            >
+                <Text>
+                    Log out
+                </Text>
             </Pressable>
 
             <View style={styles.latlong}>            
@@ -91,7 +126,7 @@ const styles = StyleSheet.create({
         paddingTop: 80,
       },
     latlong:{
-        paddingTop:200,
+        paddingTop:100,
         flexDirection: 'row',
         justifyContent:'space-evenly',
         alignItems:'stretch',
@@ -101,7 +136,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#DDDDDD',
         padding: 10,
-        margin:30,
+        margin:20,
     }
 
 })

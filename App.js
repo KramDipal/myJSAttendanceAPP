@@ -10,6 +10,8 @@ import {
 
 // import ContextProvider from "./store/context";
 import FireBaseAuthUserContextProvider from "./store/firebaseContext";
+import ContextProvider from "./store/context";
+import ContextProviderAPI from "./store/contextAPI";
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -18,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons'
 // // Firebase
 // import { onAuthStateChanged } from "firebase/auth";
 import { AUTH } from "./firebaseConfig";
+import { signOutWithMsg } from "./auth/signOut";
 
 // Screens
 import Home from './screens/home';
@@ -38,14 +41,14 @@ const Drawer = createDrawerNavigator();
 //Bottom Tab Navigator
 const Tab = createBottomTabNavigator()
 
-const signOutWithMsg = async (user) => {
-  Alert.alert('Goodbye! ' + (user ? user.email : 'User'));
-  try {
-    await AUTH.signOut();
-  } catch (error) {
-    console.error('Error signing out: ', error);
-  }
-};
+// const signOutWithMsg = async (user) => {
+//   Alert.alert('Goodbye! ' + (user ? user.email : 'User'));
+//   try {
+//     await AUTH.signOut();
+//   } catch (error) {
+//     console.error('Error signing out: ', error);
+//   }
+// };
 
 
 function CustomDrawerContent(props) {
@@ -76,7 +79,7 @@ const Utils = () => (
                 ),
                 headerTitle:'Post'
               }}
-              initialParams={{ user: useContext(FirebaseContextStore).user }} // Passing the user prop as initialParams
+              // initialParams={{ user: "useContext(FirebaseContextStore).user" }} // Passing the user prop as initialParams
                         
         />
         <Tab.Screen name="Register"
@@ -87,7 +90,7 @@ const Utils = () => (
                 headerTitle:'Register'
             }}
         >
-          { (props)=> <Text>Feeds</Text>}
+          { (props)=> <Text>QR Code Scanner</Text>}
         </Tab.Screen>
 
 
@@ -98,18 +101,21 @@ const Utils = () => (
                 ),
                 headerTitle:'Generate QR'
             }}
-            initialParams={{ user: useContext(FirebaseContextStore).user }}
+            // initialParams={{ user: useContext(FirebaseContextStore).user }}
         />
     </Tab.Navigator>
   // </FireBaseAuthUserContextProvider>
 )
 
-const DrawerNavigator = () => {
+const DrawerNavigator = (props) => {
+  console.log("DrawerNavigator " + props);
   const { user } = useContext(FirebaseContextStore);
 
   return (
-    <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}>
+    <Drawer.Navigator 
+      drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={Utils} />
+
       {!user && <Drawer.Screen name="Auth" component={SignIn} />}
     </Drawer.Navigator>
   );
@@ -118,27 +124,15 @@ const DrawerNavigator = () => {
 export default function App() {
   return (
 
-      // <FireBaseAuthUserContextProvider>
-      // <NavigationContainer>
-      //   <Drawer.Navigator          
-      //     //The drawerContent prop is used to customize the contents of the drawer.
-      //     drawerContent={(props) => (
-      //         //add 'user' property(in blue) to props
-      //       <CustomDrawerContent {...props} user={user} />
-      //     )}
-      //   >
-      //     <Drawer.Screen name="Home" component={Utils}/>
-
-      //     {!user && <Drawer.Screen name="Auth" component={SignIn} />}
-      //   </Drawer.Navigator>
-      // </NavigationContainer>
-      // </FireBaseAuthUserContextProvider>
-      
-      <FireBaseAuthUserContextProvider>
-        <NavigationContainer>
-          <DrawerNavigator/>
-        </NavigationContainer>
-      </FireBaseAuthUserContextProvider>
+      <ContextProviderAPI>
+        <ContextProvider>
+          <FireBaseAuthUserContextProvider>
+              <NavigationContainer>
+                <DrawerNavigator/>
+              </NavigationContainer>
+          </FireBaseAuthUserContextProvider>
+        </ContextProvider>
+      </ContextProviderAPI>
 
   );
 }

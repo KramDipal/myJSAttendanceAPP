@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect, useContext } from 'react'; 
 
+import { useNavigation } from "@react-navigation/native";
+
+
 // import { ContextStore } from "../store/context";
 import { FirebaseContextStore } from "../store/firebaseContext";
+import { ContextStore } from '../store/context';
 
 import { View, Text, TextInput, TouchableOpacity, Share, StyleSheet} from 'react-native'; 
 import QRCode from 'react-native-qrcode-svg'; 
@@ -10,6 +14,9 @@ import QRCode from 'react-native-qrcode-svg';
 import * as MediaLibrary from 'expo-media-library';
 import { captureRef } from 'react-native-view-shot';
 export default function GenerateQR() { 
+
+   const navigation = useNavigation();
+
 	const [qrValue, setQRValue] = useState(''); 
     const [yearLevel, setYearLevel] = useState('');
     const [section, setSection] = useState('');
@@ -20,7 +27,11 @@ export default function GenerateQR() {
     const firebaseContextStore = useContext(FirebaseContextStore);
     const { user } = firebaseContextStore;
 
+    const contextStore = useContext(ContextStore);
+    const { userName } = contextStore;
+
     console.log("GenerateQR ", user ? user.email : "No user logged in");
+
 
     //Permission to acces media or gallery.
     useEffect(() => {
@@ -98,6 +109,19 @@ export default function GenerateQR() {
 
     return(
         <View style={{alignItems:'center'}}>
+
+          <Text style={{fontSize: 15, margin:10, fontWeight: 'bold'}}>
+            Description: {userName}
+          </Text>
+          <TouchableOpacity
+                style={{margin:10}}
+                  onPress={()=>navigation.navigate('LogIn/ LogOut')}
+                >
+                  <Text>
+                    Go back Home
+                  </Text>
+            </TouchableOpacity>
+
             <View style={styles.wrapper}>
                 <Text style={styles.description}>
                     Enter employee informations
@@ -155,6 +179,8 @@ export default function GenerateQR() {
                         <Text style={styles.buttonText}>Save QR Code to Gallery</Text>
                     </TouchableOpacity>
                 )}
+
+
                 
 
             </View>
