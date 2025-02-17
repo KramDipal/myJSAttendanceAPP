@@ -6,8 +6,14 @@ import { Text, View, StyleSheet, Button, Animated, Easing } from "react-native";
 import { CameraView, Camera } from "expo-camera";
 
 import { createAttendance } from "../auth/addRecord";
+import { FirebaseContextStore } from "../store/firebaseContext";
+
+import { useContext } from "react";
+import Toast from "react-native-root-toast";
 
 export default function QRcodeReader() {
+
+  const firebaseContextStore = useContext(FirebaseContextStore);
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [barcodeType, setBarcodeType] = useState('');
@@ -40,16 +46,25 @@ export default function QRcodeReader() {
   }, [moveAnim]);
 
   
-  const handleEventSubmit = async(values) => {
+  //Save scanned record to collection 'attendance'
+  const handleEventSubmit = (values) => {
     // setLoading(true);
-    await createAttendance(values).then(()=>{
-        // resetForm()
-        console.log('Attendance saved Successfully');
-    }).finally(()=>{
-        // setLoading(false)
-        console.log('Attendance save Failed');
-    })
-}
+    // await createAttendance(values).then(()=>{ - original
+    try{
+      const addRecord = firebaseContextStore.createAttendance(values)
+      // console.log("handleEventSubmit success");
+      Toast.show('Attendance created');
+      Toast
+    }catch(e){
+      Toast.show('Ooops! Something went wrong');
+      console.error(e)
+    }
+    finally{
+      // setLoading(false)
+      console.log("handleEventSubmit failed");
+    }
+
+  }
 
   const handleBarcodeScanned = ({ type, data }) => {
     setScanned(true);
@@ -70,6 +85,8 @@ export default function QRcodeReader() {
   return (
     <View style={styles.container}>
       <CameraView
+      
+        //onBarcodeScanned - return callbacks of type and data
         onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
         barcodeScannerSettings={{
           barcodeTypes: ["qr", "pdf417"],

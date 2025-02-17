@@ -4,7 +4,18 @@ import 'firebase/auth'
 // Firebase
 import { onAuthStateChanged } from "firebase/auth";
 import { AUTH, DB } from '../firebaseConfig';
-import { collection, query, orderBy, where, limit, getDocs } from 'firebase/firestore';
+import { 
+  collection, 
+  query, orderBy, 
+  where, limit, 
+  getDocs, 
+  deleteDoc, 
+  doc, 
+  setDoc, 
+  startAt, 
+  endAt, 
+  serverTimestamp 
+} from 'firebase/firestore';
 
 
 export const FirebaseContextStore = createContext();
@@ -40,7 +51,9 @@ export default function FireBaseAuthUserContextProvider(props){
       return () => unsubscribe();
     }, []);
 
-    const getAttendanceRecord = async (docLimit, emp) => {
+    // Search rev 1
+    //original code for searching
+    /*const getAttendanceRecord = async (docLimit, emp) => {
       console.log("getAttendanceRecord " + emp?.length);
       try {
           const user = AUTH.currentUser;
@@ -79,8 +92,109 @@ export default function FireBaseAuthUserContextProvider(props){
       } catch (e) {
           console.log(e);
       }
+    }*/
+
+      /*Add scanned record */
+    const createAttendance = async(formData) => {
+        console.log("createAttendance formData" + formData);
+
+        try{
+            // GET USER
+            const user = AUTH.currentUser;
+            /// POST DOC
+            const docRef = doc(attendanceCol);
+            // const id = docRef.id
+            const attendanceData = {
+                status:'pending',
+                created_at: serverTimestamp(),
+                owner:user.uid,
+                employee: formData,
+                // ...formData
+            };
+            await setDoc(docRef,attendanceData);
+            // Toast.show('Attendance created');
+            return attendanceData;
+        } catch(e){
+            // Toast.show('Oops, try again');
+            console.log(e)
+        }
     }
+
+
+
+
+
+      /*Delete record*/
+      const deleteRecord = async (docID) => {
+
+        console.log("deleteRecord docID " + docID)
+        try {
+          await deleteDoc(doc(DB, 'attendance', docID));
+          console.log(`Document with ID ${docID} has been deleted.`);
+        } catch (error) {
+          console.error('Error deleting document:', error);
+        }
+      };
     
+      /*Get record */
+      const getAttendanceRecord = async (docLimit, emp) => {
+        console.log("getAttendanceRecord " + emp?.length);
+        try {
+            const user = AUTH.currentUser;
+            let q;
+
+            //Search rev 2
+            const startText = emp;
+            const endText = emp + '\uf8ff';
+            //Search rev 2
+
+            if (emp && emp.length > 0) {
+                q = query(
+                    attendanceCol,
+                    // orderBy('created_at', 'desc'), - rev 1
+                    orderBy('employee'),//Search rev 2
+                    where('owner', '==', user.uid),
+                    where('status', '==', 'pending'),
+                    // where('employee', '==', emp), - rev 1
+                    startAt(startText),//Search rev 2
+                    endAt(endText),//Search rev 2
+                    limit(docLimit)
+                );
+            } else {
+                q = query(
+                    attendanceCol,
+                    orderBy('created_at', 'desc'),
+                    orderBy('employee'), //rev 2
+                    where('owner', '==', user.uid),
+                    where('status', '==', 'pending'),
+                    limit(docLimit)
+                );
+            }
+    
+            const querySnapshot = await getDocs(q);
+            const attendance = getMoreHelper(querySnapshot);
+    
+            console.log("attendance structure: ", attendance);
+  
+            // Update the context with the retrieved attendance data
+            setContextState({ attendance });
+    
+            // Return the updated attendance data as the result of the function
+            // return attendance;
+
+
+            //Search rev 2
+            const snapshot = await getDocs(q);
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            return { attendance: data };
+            //Search rev 2
+    
+        } catch (e) {
+            console.log(e);
+        }
+      }
+
+
     function getMoreHelper(querySnapshot){
       // let lastVisible = querySnapshot.docs[querySnapshot.docs.length-1];
       const attendance = querySnapshot.docs.map(doc=>({
@@ -103,7 +217,9 @@ export default function FireBaseAuthUserContextProvider(props){
         <FirebaseContextStore.Provider value={{
           user,
           state,
-          getAttendanceRecord
+          createAttendance,
+          getAttendanceRecord,
+          deleteRecord
         }}>
             {props.children}
         </FirebaseContextStore.Provider>
