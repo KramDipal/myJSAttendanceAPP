@@ -3,7 +3,8 @@ import firebase from 'firebase/app';
 import 'firebase/auth'
 // Firebase
 import { onAuthStateChanged } from "firebase/auth";
-import { AUTH } from '../firebaseConfig';
+import { AUTH, DB } from '../firebaseConfig';
+import { collection, query, orderBy, where, limit, getDocs } from 'firebase/firestore';
 
 
 export const FirebaseContextStore = createContext();
@@ -12,6 +13,19 @@ export const FirebaseContextStore = createContext();
 
 export default function FireBaseAuthUserContextProvider(props){
     const [user, setUser] = useState(null);
+    const [state, setState] = useState({
+      attendance: [], // Initialize with an empty array
+  });
+
+
+  const setContextState = (newState) => {
+      setState((prevState) => ({
+          ...prevState,
+          ...newState
+      }));
+  };
+    let attendanceCol = collection(DB,'attendance');
+
     useEffect(() => {
       // Set up listener for authentication state changes.
       // When the user is signed in, update the user state.
@@ -26,9 +40,71 @@ export default function FireBaseAuthUserContextProvider(props){
       return () => unsubscribe();
     }, []);
 
+    const getAttendanceRecord = async (docLimit, emp) => {
+      console.log("getAttendanceRecord " + emp?.length);
+      try {
+          const user = AUTH.currentUser;
+          let q;
+  
+          if (emp && emp.length > 0) {
+              q = query(
+                  attendanceCol,
+                  orderBy('created_at', 'desc'),
+                  where('owner', '==', user.uid),
+                  where('status', '==', 'pending'),
+                  where('employee', '==', emp),
+                  limit(docLimit)
+              );
+          } else {
+              q = query(
+                  attendanceCol,
+                  orderBy('created_at', 'desc'),
+                  where('owner', '==', user.uid),
+                  where('status', '==', 'pending'),
+                  limit(docLimit)
+              );
+          }
+  
+          const querySnapshot = await getDocs(q);
+          const attendance = getMoreHelper(querySnapshot);
+  
+          console.log("attendance structure: ", attendance);
+
+          // Update the context with the retrieved attendance data
+          setContextState({ attendance });
+  
+          // Return the updated attendance data as the result of the function
+          return attendance;
+  
+      } catch (e) {
+          console.log(e);
+      }
+    }
+    
+    function getMoreHelper(querySnapshot){
+      // let lastVisible = querySnapshot.docs[querySnapshot.docs.length-1];
+      const attendance = querySnapshot.docs.map(doc=>({
+          id: doc.id,
+          ...doc.data()
+      }));
+  
+      // if(lastVisible === undefined || lastVisible === null){
+      //     lastVisible = false;
+      // }
+  
+      return {
+        attendance
+      }
+  }
+
+
     return(
         // console.log('FireBaseAuthUser')
-        <FirebaseContextStore.Provider value={{user}}>
+        <FirebaseContextStore.Provider value={{
+          user,
+          state,
+          getAttendanceRecord
+        }}>
             {props.children}
         </FirebaseContextStore.Provider>
     )

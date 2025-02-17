@@ -10,6 +10,10 @@ import {
 
 // import ContextProvider from "./store/context";
 import FireBaseAuthUserContextProvider from "./store/firebaseContext";
+import { FirebaseContextStore } from "./store/firebaseContext";
+
+
+
 import ContextProvider from "./store/context";
 import ContextProviderAPI from "./store/contextAPI";
 
@@ -19,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons'
 
 // // Firebase
 // import { onAuthStateChanged } from "firebase/auth";
-import { AUTH } from "./firebaseConfig";
+// import { AUTH } from "./firebaseConfig";
 import { signOutWithMsg } from "./auth/signOut";
 
 // Screens
@@ -33,7 +37,8 @@ import PostComp from "./screens/utils";
 import GenerateQR from "./screens/generateQR";
 import QrCodeReader from "./screens/qrcodeReader";
 import FireBaseAuthUser from "./store/firebaseContext";
-import { FirebaseContextStore } from "./store/firebaseContext";
+import QRcodeReader from "./screens/qrcodeReader";
+import AttendanceSummary from "./screens/attendanceSummary";
 
 // import Pattern from './assets/bg_image.jpg';
 const Drawer = createDrawerNavigator();
@@ -82,7 +87,7 @@ const Utils = () => (
               // initialParams={{ user: "useContext(FirebaseContextStore).user" }} // Passing the user prop as initialParams
                         
         />
-        <Tab.Screen name="Register"
+        <Tab.Screen name="Register" component={QRcodeReader}
             options={{
                 tabBarIcon: ({color,size})=> (
                 <Ionicons name="list" color={color} size={size}/>
@@ -90,7 +95,7 @@ const Utils = () => (
                 headerTitle:'Register'
             }}
         >
-          { (props)=> <Text>QR Code Scanner</Text>}
+          {/* { (props)=> <Text>QR Code Scanner</Text>} */}
         </Tab.Screen>
 
 
@@ -103,12 +108,21 @@ const Utils = () => (
             }}
             // initialParams={{ user: useContext(FirebaseContextStore).user }}
         />
+        <Tab.Screen name="Summary" component={AttendanceSummary}
+            options={{
+                tabBarIcon: ({color,size})=> (
+                <Ionicons name="people" color={color} size={size}/>
+                ),
+                headerTitle:'Attendance Summary'
+            }}
+            // initialParams={{ user: useContext(FirebaseContextStore).user }}
+        />
     </Tab.Navigator>
   // </FireBaseAuthUserContextProvider>
 )
 
 const DrawerNavigator = (props) => {
-  console.log("DrawerNavigator " + props);
+  // console.log("DrawerNavigator " + props);
   const { user } = useContext(FirebaseContextStore);
 
   return (

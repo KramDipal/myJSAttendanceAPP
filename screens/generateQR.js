@@ -15,12 +15,12 @@ import * as MediaLibrary from 'expo-media-library';
 import { captureRef } from 'react-native-view-shot';
 export default function GenerateQR() { 
 
-   const navigation = useNavigation();
+    const navigation = useNavigation();
 
-	const [qrValue, setQRValue] = useState(''); 
+	  const [qrValue, setQRValue] = useState(''); 
     const [yearLevel, setYearLevel] = useState('');
     const [section, setSection] = useState('');
-	const [isActive, setIsActive] = useState(false); 
+	  const [isActive, setIsActive] = useState(false); 
     const qrCodeRef = useRef(null);
     let [students, setStudents] = useState([]);
 
