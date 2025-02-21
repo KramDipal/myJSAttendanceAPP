@@ -144,9 +144,9 @@ export default function AttendanceSummary() {
                 onPress={() => handlePress(item)}
             > */}
                 <View style={styles.box}>
-                    <Text>Employee: {item.employee}</Text>
-                    <Text>ID: {item.id}</Text>
-                    <Text>Date: {new Date(item.created_at.seconds * 1000).toString()}</Text> 
+                    <Text style={{color:'blue'}}>Employee: {item.employee}</Text>
+                    <Text style={{color:'blue'}}>ID: {item.id}</Text>
+                    <Text style={{color:'blue'}}>Date: {new Date(item.created_at.seconds * 1000).toString()}</Text> 
                     {/* Converting Timestamp to Date */}
 
                     {/* <Pressable
@@ -190,6 +190,7 @@ export default function AttendanceSummary() {
                     <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
                     <FlatList
+
                         data={attendanceList}
                         renderItem={renderItem}
                         keyExtractor={(item) => item.id}

@@ -17,10 +17,11 @@ export default function GenerateQR() {
 
     const navigation = useNavigation();
 
-	  const [qrValue, setQRValue] = useState(''); 
-    const [yearLevel, setYearLevel] = useState('');
-    const [section, setSection] = useState('');
-	  const [isActive, setIsActive] = useState(false); 
+	  const [ qrValue, setQRValue ] = useState(''); 
+    const [ yearLevel, setYearLevel ] = useState('');
+    const [ section, setSection ] = useState('');
+    const [ position, setPosition ] = useState('');
+	  const [ isActive, setIsActive ] = useState(false); 
     const qrCodeRef = useRef(null);
     let [students, setStudents] = useState([]);
 
@@ -66,7 +67,7 @@ export default function GenerateQR() {
 	}; 
 
     const getQRCodeValue = () => {
-        return `${qrValue}${yearLevel}${section}`;
+        return `${qrValue}${position}${yearLevel}${section}`;
       };
 
     const handleSaveQRCode = async () => {
@@ -132,6 +133,12 @@ export default function GenerateQR() {
                     placeholder="Enter Employee Name"
                     value={qrValue} 
                     onChangeText={handleInputChange} 
+                /> 
+                <TextInput 
+                    style={styles.input} 
+                    placeholder="Position"
+                    value={position} 
+                    onChangeText={setPosition} 
                 /> 
                  <TextInput 
                     style={styles.input} 

@@ -51,7 +51,7 @@ export default function ContextProviderAPI(props){
             apiName: apiName,
             changeUserName:(name)=>changeUserName(name),
             location,
-            // getLocation
+            getLocation
             //function to change user context:
 
         }}>
