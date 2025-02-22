@@ -23,7 +23,16 @@ export default function PostComp() {
   const scrollViewRef = useRef(null);
   const { location } = useContext(ContextStoreAPI); // Simplified context usage
   const videoRef = useRef(null);
+  const [ city, setCity ] = useState('Loading...');
+  const [ cityLoading, setCityLoading ] = useState(false);
+  const [ autoScroll, setAutoScroll]  = useState(true);
+  const [ currentIndex, setCurrentIndex ] = useState(0);
+  const [ modalVisible, setModalVisible ] = useState(false);
+  const [ selectedImage, setSelectedImage ] = useState(null);
+  const [ selectedPayImage, setSelectedImagePay ] = useState(null);
+  const [ selectedVideo, setSelectedVideo ] = useState([0]);
 
+  const imageWidth = screenWidth * 0.5;
   const [images] = useState([
     require('../assets/puma.jpg'),
     require('../assets/puma1.jpg'),
@@ -36,10 +45,6 @@ export default function PostComp() {
   ]);
 
   const [imagesPay] = useState([
-    // require('../assets/amex.png'),
-    // require('../assets/jcb.jpg'),
-    // require('../assets/mc.jpg'),
-    // require('../assets/visa.png'),
     require('../assets/pumaBball.jpg'),
     require('../assets/pumaEveryday.jpg'),
     require('../assets/pumaf1logo.jpg'),
@@ -47,16 +52,14 @@ export default function PostComp() {
   ]);
 
 
-  const [city, setCity] = useState('Loading...');
-  const [cityLoading, setCityLoading] = useState(false);
-  const [autoScroll, setAutoScroll] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [videoMap] = useState([    
+    require('../assets/pumavid2.mp4'),
+    require('../assets/pumavid3.mp4'),
+    require('../assets/pumavid4.mp4'),
+    require('../assets/pumavid.mp4'),
+  ]);
 
 
-  const imageWidth = screenWidth * 0.5;
-  // const videoUrl = 'https://www.youtube.com/watch?v=OmQGUQNQkwk';
 
   useEffect(() => {
     if (!autoScroll) return;
@@ -74,6 +77,7 @@ export default function PostComp() {
 
     return () => clearInterval(scrollInterval);
   }, [autoScroll, images, imageWidth]);
+
 
   // useEffect(() => {
   //   const fetchCity = async () => {
@@ -100,15 +104,21 @@ export default function PostComp() {
   const handleImagePress = (index) => {
     // Alert.alert('Image Pressed', `You clicked on image #${index + 1}`);
     setSelectedImage(images[index]);
+    setSelectedImagePay(null);
     setModalVisible(true);
     // You can replace this with any action, e.g., navigation or custom logic
   };
 
+
+  //select and load video base on index
   const handleImagePressPay = (index) => {
-    // console.log(`Image ${index} pressed`);
+     console.log(`Image ${index} pressed`);
     // Add your navigation or action logic here
-    setSelectedImage(imagesPay[index]);
-    setModalVisible(true);
+        // Alert.alert('Image Pressed', `You clicked on image #${index + 1}`)    
+    setSelectedVideo(index)
+    // setSelectedImagePay(imagesPay[index]);
+    // setSelectedImage(null); //for the modal display on selected image
+    // setModalVisible(true);
   };
 
   const handlePlaybackStatusUpdate = (status) => {
@@ -118,6 +128,8 @@ export default function PostComp() {
   };
   
   const formatCoordinate = (coord) => (coord ? coord.toFixed(2) : 'N/A');
+
+  console.log("selectedVideo " + selectedVideo);
 
   return (
     <>
@@ -155,23 +167,19 @@ export default function PostComp() {
         </TouchableOpacity>
       ))}
       </View>
+
+  
       <View style={styles.viewView}>
           <Video
                 ref={videoRef}
-                source={require('../assets/pumavid2.mp4')} // Replace with your MP4 file
-                // source={{ uri: 'https://www.youtube.com/watch?v=OmQGUQNQkwk'}}
+                source={videoMap[selectedVideo]}
                 style={styles.video}
                 useNativeControls={true}
                 shouldPlay
                 isLooping={true}
                 // onPlaybatrue}tusUpdate={handlePlaybackStatusUpdate}            
           />  
-            {/* <YoutubePlayer
-              height={200}
-              // play={playing}
-              videoId={'OmQGUQNQkwk'} // Replace with your desired YouTube video ID
-              // onChangeState={onStateChange}
-            /> */}
+
       </View>
 
         <View>
@@ -221,29 +229,12 @@ export default function PostComp() {
         <Modal visible={modalVisible} transparent onRequestClose={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
 
-            {/* {console.log(selectedImage)} */}
-
 
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalClose}>
               <Text style={styles.closeText}>Close</Text>
             </TouchableOpacity>
-            
-            {/* {selectedImage === 23 
-            ?           
-                <Video
-                ref={videoRef}
-                source={require('../assets/ctls.mp4')} // Replace with your MP4 file
-                style={styles.video}
-                useNativeControls={false}
-                shouldPlay
-                isLooping={false}
-                onPlaybackStatusUpdate={handlePlaybackStatusUpdate}            
-                />            
-            :
-            <Image source={selectedImage} style={styles.fullImage} />
-          }  */}
 
-          <Image source={selectedImage} style={styles.fullImage} />
+          <Image source={selectedPayImage ? selectedPayImage : selectedImage} style={styles.fullImage} />
           </View>
         </Modal>
 
