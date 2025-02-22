@@ -127,10 +127,21 @@ const DrawerNavigator = (props) => {
 
   return (
     <Drawer.Navigator 
-      drawerContent={(props) => <CustomDrawerContent {...props} />}>
-      <Drawer.Screen name="Home" component={Utils} />
+        screenOptions={{
+        headerStyle:{backgroundColor:'red'},
+        headerTintColor:'white',
+        //DRAWER CONTENT
+        drawerContentStyle:{backgroundColor:'black'},
+        drawerInactiveTintColor:'black',
+        drawerActiveTintColor:'white',
+        drawerActiveBackgroundColor:'black',
+        }}
+        drawerContent={(props) => <CustomDrawerContent {...props} />}>
+        <Drawer.Screen name="Home" component={Utils} 
+      
+      />
 
-      {!user && <Drawer.Screen name="Auth" component={SignIn} />}
+      {!user && <Drawer.Screen name="Auth" component={SignIn}/>}
     </Drawer.Navigator>
   );
 };

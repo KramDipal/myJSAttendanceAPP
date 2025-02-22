@@ -15,6 +15,7 @@ import * as Location from 'expo-location';
 import Pattern from '../assets/bg_image.jpg';
 import { ContextStoreAPI } from '../store/contextAPI';
 import { Video } from 'expo-av';
+// import YoutubePlayer from 'react-native-youtube-iframe';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -24,15 +25,28 @@ export default function PostComp() {
   const videoRef = useRef(null);
 
   const [images] = useState([
-    require('../assets/img1.jpg'),
-    require('../assets/img2.jpg'),
-    require('../assets/img3.jpg'),
-    require('../assets/img4.jpg'),
-    require('../assets/road1.png'),
-    require('../assets/img2.jpg'),
-    require('../assets/img3.jpg'),
-    require('../assets/img4.jpg'),
+    require('../assets/puma.jpg'),
+    require('../assets/puma1.jpg'),
+    require('../assets/pumaf1.jpg'),
+    require('../assets/pumaf2.jpg'),
+    require('../assets/pumaBolt.jpg'),
+    require('../assets/pumaC.jpg'),
+    require('../assets/pumaBall.jpg'),
+    require('../assets/pumaFoot.jpg'),
   ]);
+
+  const [imagesPay] = useState([
+    // require('../assets/amex.png'),
+    // require('../assets/jcb.jpg'),
+    // require('../assets/mc.jpg'),
+    // require('../assets/visa.png'),
+    require('../assets/pumaBball.jpg'),
+    require('../assets/pumaEveryday.jpg'),
+    require('../assets/pumaf1logo.jpg'),
+    require('../assets/pumaFootBall.png'),
+  ]);
+
+
   const [city, setCity] = useState('Loading...');
   const [cityLoading, setCityLoading] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -42,6 +56,7 @@ export default function PostComp() {
 
 
   const imageWidth = screenWidth * 0.5;
+  // const videoUrl = 'https://www.youtube.com/watch?v=OmQGUQNQkwk';
 
   useEffect(() => {
     if (!autoScroll) return;
@@ -60,26 +75,26 @@ export default function PostComp() {
     return () => clearInterval(scrollInterval);
   }, [autoScroll, images, imageWidth]);
 
-  useEffect(() => {
-    const fetchCity = async () => {
-      if (!location?.coords) {
-        setCity('N/A');
-        return;
-      }
-      setCityLoading(true);
-      try {
-        const { latitude, longitude } = location.coords;
-        const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
-        setCity(geocode[0]?.city || geocode[0]?.subregion || 'Unknown');
-      } catch (error) {
-        console.error('Error fetching city:', error);
-        setCity('Error');
-      } finally {
-        setCityLoading(false);
-      }
-    };
-    fetchCity();
-  }, [location]);
+  // useEffect(() => {
+  //   const fetchCity = async () => {
+  //     if (!location?.coords) {
+  //       setCity('N/A');
+  //       return;
+  //     }
+  //     setCityLoading(true);
+  //     try {
+  //       const { latitude, longitude } = location.coords;
+  //       const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+  //       setCity(geocode[0]?.city || geocode[0]?.subregion || 'Unknown');
+  //     } catch (error) {
+  //       console.error('Error fetching city:', error);
+  //       setCity('Error');
+  //     } finally {
+  //       setCityLoading(false);
+  //     }
+  //   };
+  //   fetchCity();
+  // }, [location]);
 
   // Handle image press
   const handleImagePress = (index) => {
@@ -87,6 +102,13 @@ export default function PostComp() {
     setSelectedImage(images[index]);
     setModalVisible(true);
     // You can replace this with any action, e.g., navigation or custom logic
+  };
+
+  const handleImagePressPay = (index) => {
+    // console.log(`Image ${index} pressed`);
+    // Add your navigation or action logic here
+    setSelectedImage(imagesPay[index]);
+    setModalVisible(true);
   };
 
   const handlePlaybackStatusUpdate = (status) => {
@@ -99,8 +121,60 @@ export default function PostComp() {
 
   return (
     <>
-      <ImageBackground source={require('../assets/CoLogo2.jpg')} resizeMode="cover" style={styles.container}>
-        <View style={{ marginTop: 420 }}>
+      <ImageBackground 
+        source={require('../assets/pumaLogo.png')} 
+        resizeMode="stretch"
+        style={styles.container}
+        >
+
+      {/* <View style={styles.imageContainer}>
+        {imagesPay.map((imagesPay, index) => (
+              // <TouchableOpacity
+              //   key={index}
+              //   onPress={() => handleImagePress(index)}
+              //   activeOpacity={0.8} // Slight fade effect on press
+              // >
+                <Image
+                  source={imagesPay}
+                  style={styles.imagePay}
+                />
+              // </TouchableOpacity>
+            ))}
+
+        </View> */}
+
+      <View style={styles.imagePayContainer}>
+      {imagesPay.map((imagePay, index) => (
+        <TouchableOpacity
+          key={index}
+          onPress={() => handleImagePressPay(index)}
+          activeOpacity={0.8} // Slight fade on press
+          style={styles.touchable}
+        >
+          <Image source={imagePay} style={styles.imagePay} />
+        </TouchableOpacity>
+      ))}
+      </View>
+      <View style={styles.viewView}>
+          <Video
+                ref={videoRef}
+                source={require('../assets/pumavid2.mp4')} // Replace with your MP4 file
+                // source={{ uri: 'https://www.youtube.com/watch?v=OmQGUQNQkwk'}}
+                style={styles.video}
+                useNativeControls={true}
+                shouldPlay
+                isLooping={true}
+                // onPlaybatrue}tusUpdate={handlePlaybackStatusUpdate}            
+          />  
+            {/* <YoutubePlayer
+              height={200}
+              // play={playing}
+              videoId={'OmQGUQNQkwk'} // Replace with your desired YouTube video ID
+              // onChangeState={onStateChange}
+            /> */}
+      </View>
+
+        <View>
           <ScrollView
             ref={scrollViewRef}
             horizontal
@@ -153,7 +227,8 @@ export default function PostComp() {
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalClose}>
               <Text style={styles.closeText}>Close</Text>
             </TouchableOpacity>
-            {selectedImage === 23 
+            
+            {/* {selectedImage === 23 
             ?           
                 <Video
                 ref={videoRef}
@@ -166,7 +241,9 @@ export default function PostComp() {
                 />            
             :
             <Image source={selectedImage} style={styles.fullImage} />
-          } 
+          }  */}
+
+          <Image source={selectedImage} style={styles.fullImage} />
           </View>
         </Modal>
 
@@ -174,8 +251,9 @@ export default function PostComp() {
       <View style={styles.latlong}>
         <Text style={styles.coordText}>Latitude: {formatCoordinate(location?.coords.latitude)}°</Text>
         <Text style={styles.coordText}>Longitude: {formatCoordinate(location?.coords.longitude)}°</Text>
+        <Text style={styles.coordText}>City: {cityLoading ? 'Loading...' : city}</Text>
       </View>
-      <Text style={styles.cityText}>City: {cityLoading ? 'Loading...' : city}</Text>
+
     </>
   );
 }
@@ -186,9 +264,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   latlong: {
-    marginTop: 10,
+    marginTop: 5,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
+    marginBottom:5,
   },
   scrollContainer: {
     alignItems: 'center',
@@ -197,6 +276,30 @@ const styles = StyleSheet.create({
     height: 100,
     marginHorizontal: 10,
     borderRadius: 10,
+  },
+  imagePay: {
+    height: 50,
+    width: 90,
+    borderRadius: 10, // Rounded corners
+    marginHorizontal: 8, // Space between images
+    shadowColor: '#000', // Shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4, // Android shadow
+    borderWidth: 1, // Subtle border
+    borderColor: 'black', // Light border color
+    backgroundColor: '#fff', // White background for images
+  },
+  imagePayContainer: {
+    marginTop:5,
+    flexDirection: 'row', // Horizontal layout
+    justifyContent: 'space-around', // Evenly space images
+    alignItems: 'center', // Vertically center images
+    paddingVertical: 5, // Add some vertical padding
+    // paddingHorizontal: 5, // Slight horizontal padding
+    backgroundColor: 'black', // Light gray background for contrast
+    // borderRadius: 5, // Rounded container edges
   },
   controlContainer: {
     alignItems: 'center',
@@ -226,13 +329,13 @@ const styles = StyleSheet.create({
   coordText: {
     // color: '#ffca2b',
     color: '#7117b3',
-    fontSize: 20,
+    fontSize: 15,
   },
   cityText: {
     // color: '#ffca2b',
     color:'#7117b3',
-    fontSize: 20,
-    marginLeft: 35,
+    fontSize: 15,
+    marginLeft: 58,
     marginTop: 5,
   },
   modalOverlay: {
@@ -256,8 +359,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   video: {
-    width: screenWidth * 0.8,
-    height: 200,
+    width: 400,//screenWidth * 1.1,
+    height: 360,
     borderRadius: 10,
+    // backgroundColor: 'blue',
   },
+  viewView:{
+    justifyContent:'center', 
+    alignContent:'center', 
+    alignItems:'center', 
+    marginVertical:'20'},
 });

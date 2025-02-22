@@ -16,6 +16,7 @@
     "@reduxjs/toolkit": "^2.5.1",
     "axios": "^1.7.9",
     "expo": "~52.0.35",
+    "expo-av": "~15.0.2",
     "expo-camera": "^16.0.16",
     "expo-file-system": "~18.0.10",
     "expo-location": "~18.0.6",
@@ -35,8 +36,7 @@
     "react-native-screens": "~4.4.0",
     "react-native-view-shot": "^4.0.3",
     "react-redux": "^9.2.0",
-    "yup": "^1.6.1",
-    "expo-av": "~15.0.2"
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
