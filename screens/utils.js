@@ -8,15 +8,19 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
-  Alert,
   Modal,
-  Platform,
   Button
 } from 'react-native';
 import * as Location from 'expo-location';
-import Pattern from '../assets/bg_image.jpg';
 import { ContextStoreAPI } from '../store/contextAPI';
 import { Video } from 'expo-av';
+
+import {
+  BarChart,
+  PieChart,
+} from 'react-native-chart-kit';
+
+
 // import YoutubePlayer from 'react-native-youtube-iframe';
 
 // const { width: screenWidth } = Dimensions.get('window');
@@ -159,6 +163,25 @@ export default function PostComp() {
   
   const formatCoordinate = (coord) => (coord ? coord.toFixed(2) : 'N/A');
 
+
+  // const barData = {
+  //   labels: ['Video 1', 'Video 2', 'Video 3', 'Video 4'],
+  //   datasets: [
+  //     {
+  //       data: selectionVideoCounts,
+  //     },
+  //   ],
+  // };
+
+  const vidName = ['Neymar','Kiko','Hamilton', 'Ball'];
+  // Pie chart data for modal
+  const pieData = selectionVideoCounts.map((count, index) => ({
+    name: vidName[index],
+    population: count,
+    color: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'][index], // Distinct colors
+    legendFontColor: '#7F7F7F',
+    legendFontSize: 15,
+  })).filter(item => item.population > 0); // Only show videos with counts
   // console.log("selectedVideo " + selectedVideo);
 
   return (
@@ -170,44 +193,78 @@ export default function PostComp() {
         >
 
 
-      {/* <View style={styles.imageContainer}>
-        {imagesPay.map((imagesPay, index) => (
-              // <TouchableOpacity
-              //   key={index}
-              //   onPress={() => handleImagePress(index)}
-              //   activeOpacity={0.8} // Slight fade effect on press
-              // >
-                <Image
-                  source={imagesPay}
-                  style={styles.imagePay}
-                />
-              // </TouchableOpacity>
-            ))}
-
+        {/* Video Selection Buttons */}
+        {/* <View>
+        {videoMap.map((_, index) => (
+          <Button
+            key={index}
+            title={`Play Video ${index + 1}`}
+            onPress={() => handleVideoSelection(index)}
+          />
+        ))}
         </View> */}
 
+      {/* Dashboard with Bar Chart */}
+      {/* <View style={styles.dashboard}>
+        <Text style={styles.dashboardTitle}>Video Selection Dashboard</Text>
+        <BarChart
+          data={barData}
+          width={screenWidth - 60} // Adjust for padding
+          height={220}
+          yAxisLabel=""
+          chartConfig={{
+            backgroundColor: '#f0f0f0',
+            backgroundGradientFrom: '#f0f0f0',
+            backgroundGradientTo: '#f0f0f0',
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            style: {
+              borderRadius: 16,
+            },
+          }}
+          style={{
+            marginVertical: 8,
+            borderRadius: 16,
+          }}
+        />
+      </View> */}
+
+      
       {/*  Display Dashboard Start*/}
       {/* Modal Trigger Button */}
       <Button
         title="Dashboard"
         onPress={() => setModalVidCountVisible(true)}
       />
-      {/* Modal */}
+
+      {/* Modal with Pie Chart */}
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalCountVisible}
         onRequestClose={() => setModalVidCountVisible(false)}
       >
-
         <View style={styles.modalView}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Dashboard</Text>
-            {selectionVideoCounts.map((count, index) => (
-              <Text key={index} style={styles.modalItem}>
-                Video {index + 1}: {count} times
-              </Text>
-            ))}
+            <Text style={styles.modalTitle}>Video Selection Breakdown</Text>
+            {pieData.length > 0 ? (
+              <PieChart
+                data={pieData}
+                width={screenWidth - 100}
+                height={220}
+                chartConfig={{
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                absolute
+              />
+            ) : (
+              <Text>No selections yet</Text>
+            )}
             <Button
               title="Close"
               onPress={() => setModalVidCountVisible(false)}
@@ -215,7 +272,6 @@ export default function PostComp() {
           </View>
         </View>
       </Modal>
-
       {/* dipslay dashboard end */}
 
       <View style={styles.imagePayContainer}>
