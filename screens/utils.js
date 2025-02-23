@@ -10,7 +10,8 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  Platform
+  Platform,
+  Button
 } from 'react-native';
 import * as Location from 'expo-location';
 import Pattern from '../assets/bg_image.jpg';
@@ -32,9 +33,11 @@ export default function PostComp() {
   const [ autoScroll, setAutoScroll]  = useState(true);
   const [ currentIndex, setCurrentIndex ] = useState(0);
   const [ modalVisible, setModalVisible ] = useState(false);
+  const [ modalCountVisible, setModalVidCountVisible ] = useState(false);
   const [ selectedImage, setSelectedImage ] = useState(null);
   const [ selectedPayImage, setSelectedImagePay ] = useState(null);
   const [ selectedVideo, setSelectedVideo ] = useState([0]);
+
 
   const imageWidth = screenWidth * 0.5;
   const [images] = useState([
@@ -63,7 +66,9 @@ export default function PostComp() {
     require('../assets/pumavid.mp4'),
   ]);
 
-
+  const [selectionVideoCounts, setSelectionVideoCounts] = useState(
+    new Array(videoMap.length).fill(0) // Initialize counts as 0 for each index
+  );
 
   useEffect(() => {
     if (!autoScroll) return;
@@ -121,17 +126,36 @@ export default function PostComp() {
      console.log(`Image ${index} pressed`);
     // Add your navigation or action logic here
         // Alert.alert('Image Pressed', `You clicked on image #${index + 1}`)    
-    setSelectedVideo(index)
+    setSelectedVideo(index);
+    handleVideoSelection(index);
     // setSelectedImagePay(imagesPay[index]);
     // setSelectedImage(null); //for the modal display on selected image
     // setModalVisible(true);
   };
 
-  const handlePlaybackStatusUpdate = (status) => {
-    if (status.didJustFinish) {
-      setModalVisible(false); // Close modal when video finishes
-    }
+  //add to index + 1 if selected
+  const handleVideoSelection = (index) => {
+
+    console.log("handleVideoSelection index: " + index)
+    // setSelectedVideo(index);
+    setSelectionVideoCounts((prevCounts) => {
+      const newCounts = [...prevCounts];
+      console.log("handleVideoSelection newCounts: " + newCounts)
+
+      newCounts[index] = (newCounts[index] || 0) + 1;
+
+      console.log("handleVideoSelection newCounts2: " + newCounts)
+      return newCounts;
+    });
+
+
   };
+  // console.log("handleVideoSelection selectionCounts: " + selectionCounts)
+  // const handlePlaybackStatusUpdate = (status) => {
+  //   if (status.didJustFinish) {
+  //     setModalVisible(false); // Close modal when video finishes
+  //   }
+  // };
   
   const formatCoordinate = (coord) => (coord ? coord.toFixed(2) : 'N/A');
 
@@ -144,6 +168,7 @@ export default function PostComp() {
         resizeMode="repeat"
         style={styles.container}
         >
+
 
       {/* <View style={styles.imageContainer}>
         {imagesPay.map((imagesPay, index) => (
@@ -160,6 +185,38 @@ export default function PostComp() {
             ))}
 
         </View> */}
+
+      {/*  Display Dashboard Start*/}
+      {/* Modal Trigger Button */}
+      <Button
+        title="Dashboard"
+        onPress={() => setModalVidCountVisible(true)}
+      />
+      {/* Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalCountVisible}
+        onRequestClose={() => setModalVidCountVisible(false)}
+      >
+
+        <View style={styles.modalView}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Dashboard</Text>
+            {selectionVideoCounts.map((count, index) => (
+              <Text key={index} style={styles.modalItem}>
+                Video {index + 1}: {count} times
+              </Text>
+            ))}
+            <Button
+              title="Close"
+              onPress={() => setModalVidCountVisible(false)}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* dipslay dashboard end */}
 
       <View style={styles.imagePayContainer}>
       {imagesPay.map((imagePay, index) => (
@@ -183,11 +240,9 @@ export default function PostComp() {
                 useNativeControls={true}
                 shouldPlay
                 isLooping={true}
-                resizeMode="contain"
-                
+                resizeMode="contain"                
                 // onPlaybatrue}tusUpdate={handlePlaybackStatusUpdate}            
           />  
-
       </View>
 
         <View>
@@ -373,5 +428,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 20, // Number, not string
+  },
+  dashboard: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    width: screenWidth - 40,
+  },
+  dashboardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  dashboardItem: {
+    fontSize: 16,
+    marginVertical: 5,
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: screenWidth - 60,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  modalItem: {
+    fontSize: 16,
+    marginVertical: 5,
   },
 });
