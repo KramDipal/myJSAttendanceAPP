@@ -9,7 +9,8 @@ import {
   Dimensions,
   TouchableOpacity,
   Alert,
-  Modal
+  Modal,
+  Platform
 } from 'react-native';
 import * as Location from 'expo-location';
 import Pattern from '../assets/bg_image.jpg';
@@ -17,7 +18,10 @@ import { ContextStoreAPI } from '../store/contextAPI';
 import { Video } from 'expo-av';
 // import YoutubePlayer from 'react-native-youtube-iframe';
 
-const { width: screenWidth } = Dimensions.get('window');
+// const { width: screenWidth } = Dimensions.get('window');
+// Get screen dimensions
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 
 export default function PostComp() {
   const scrollViewRef = useRef(null);
@@ -79,26 +83,28 @@ export default function PostComp() {
   }, [autoScroll, images, imageWidth]);
 
 
-  // useEffect(() => {
-  //   const fetchCity = async () => {
-  //     if (!location?.coords) {
-  //       setCity('N/A');
-  //       return;
-  //     }
-  //     setCityLoading(true);
-  //     try {
-  //       const { latitude, longitude } = location.coords;
-  //       const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
-  //       setCity(geocode[0]?.city || geocode[0]?.subregion || 'Unknown');
-  //     } catch (error) {
-  //       console.error('Error fetching city:', error);
-  //       setCity('Error');
-  //     } finally {
-  //       setCityLoading(false);
-  //     }
-  //   };
-  //   fetchCity();
-  // }, [location]);
+
+  //get geolocation
+  useEffect(() => {
+    const fetchCity = async () => {
+      if (!location?.coords) {
+        setCity('N/A');
+        return;
+      }
+      setCityLoading(true);
+      try {
+        const { latitude, longitude } = location.coords;
+        const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+        setCity(geocode[0]?.city || geocode[0]?.subregion || 'Unknown');
+      } catch (error) {
+        console.error('Error fetching city:', error);
+        setCity('Error');
+      } finally {
+        setCityLoading(false);
+      }
+    };
+    fetchCity();
+  }, [location]);
 
   // Handle image press
   const handleImagePress = (index) => {
@@ -129,13 +135,13 @@ export default function PostComp() {
   
   const formatCoordinate = (coord) => (coord ? coord.toFixed(2) : 'N/A');
 
-  console.log("selectedVideo " + selectedVideo);
+  // console.log("selectedVideo " + selectedVideo);
 
   return (
     <>
       <ImageBackground 
-        source={require('../assets/pumaLogo.png')} 
-        resizeMode="stretch"
+        source={require('../assets/fr2.jpg')} 
+        resizeMode="repeat"
         style={styles.container}
         >
 
@@ -177,6 +183,8 @@ export default function PostComp() {
                 useNativeControls={true}
                 shouldPlay
                 isLooping={true}
+                resizeMode="contain"
+                
                 // onPlaybatrue}tusUpdate={handlePlaybackStatusUpdate}            
           />  
 
@@ -255,17 +263,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   latlong: {
-    marginTop: 5,
+    // marginTop: 5,s
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom:5,
+    // marginBottom:5,
+    backgroundColor:'#ff2800'
   },
   scrollContainer: {
     alignItems: 'center',
+    // backgroundColor:'#ff2800',
   },
   image: {
     height: 100,
-    marginHorizontal: 10,
+    marginHorizontal: 5,
     borderRadius: 10,
   },
   imagePay: {
@@ -319,7 +329,8 @@ const styles = StyleSheet.create({
   },
   coordText: {
     // color: '#ffca2b',
-    color: '#7117b3',
+    // color: '#7117b3',
+    color: 'white',
     fontSize: 15,
   },
   cityText: {
@@ -350,14 +361,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   video: {
-    width: 400,//screenWidth * 1.1,
-    height: 360,
+    // width: 400,
+    // height: 360,
+    // borderRadius: 10,
+    width: 400, // Full width minus padding
+    height: 320, // 16:9 aspect ratio
     borderRadius: 10,
-    // backgroundColor: 'blue',
+
   },
   viewView:{
-    justifyContent:'center', 
-    alignContent:'center', 
-    alignItems:'center', 
-    marginVertical:'20'},
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20, // Number, not string
+  },
 });
