@@ -9,7 +9,8 @@ import {
   Dimensions,
   TouchableOpacity,
   Modal,
-  Button
+  Button,
+  Pressable,
 } from 'react-native';
 import * as Location from 'expo-location';
 import { ContextStoreAPI } from '../store/contextAPI';
@@ -21,6 +22,8 @@ import {
 } from 'react-native-chart-kit';
 
 
+import { FirebaseContextStore } from "../store/firebaseContext";
+import Toast from "react-native-root-toast";
 // import YoutubePlayer from 'react-native-youtube-iframe';
 
 // const { width: screenWidth } = Dimensions.get('window');
@@ -41,7 +44,7 @@ export default function PostComp() {
   const [ selectedImage, setSelectedImage ] = useState(null);
   const [ selectedPayImage, setSelectedImagePay ] = useState(null);
   const [ selectedVideo, setSelectedVideo ] = useState([0]);
-
+  const firebaseContextStore = useContext(FirebaseContextStore);
 
   const imageWidth = screenWidth * 0.5;
   const [images] = useState([
@@ -127,7 +130,7 @@ export default function PostComp() {
 
   //select and load video base on index
   const handleImagePressPay = (index) => {
-     console.log(`Image ${index} pressed`);
+    //  console.log(`Image ${index} pressed`);
     // Add your navigation or action logic here
         // Alert.alert('Image Pressed', `You clicked on image #${index + 1}`)    
     setSelectedVideo(index);
@@ -140,20 +143,44 @@ export default function PostComp() {
   //add to index + 1 if selected
   const handleVideoSelection = (index) => {
 
-    console.log("handleVideoSelection index: " + index)
+    // console.log("handleVideoSelection index: " + index)
     // setSelectedVideo(index);
     setSelectionVideoCounts((prevCounts) => {
-      const newCounts = [...prevCounts];
-      console.log("handleVideoSelection newCounts: " + newCounts)
+      const newCounts = [...prevCounts]; // add current count from spread
+      // console.log("handleVideoSelection newCounts: " + newCounts)
 
       newCounts[index] = (newCounts[index] || 0) + 1;
 
-      console.log("handleVideoSelection newCounts2: " + newCounts)
+      // console.log("handleVideoSelection newCounts2: " + newCounts)
       return newCounts;
     });
 
 
   };
+
+
+// save count to firebase
+  //Save scanned record to collection 'attendance'
+  const handleEventSubmitVidCount = (values) => {
+    // setLoading(true);
+    // await createAttendance(values).then(()=>{ - original
+    try{
+      const addRecord = firebaseContextStore.createVidCount(values)
+      // console.log("handleEventSubmit success");
+      Toast.show('Attendance created');
+      setModalVidCountVisible(false);
+
+    }catch(e){
+      Toast.show('Ooops! Something went wrong');
+      console.error(e)
+    }
+    finally{
+      // setLoading(false)
+      console.log("handleEventSubmit Final");
+    }
+
+  }
+
   // console.log("handleVideoSelection selectionCounts: " + selectionCounts)
   // const handlePlaybackStatusUpdate = (status) => {
   //   if (status.didJustFinish) {
@@ -230,13 +257,47 @@ export default function PostComp() {
         />
       </View> */}
 
-      
-      {/*  Display Dashboard Start*/}
+
+      {/* Modal Display in text format start*/}
       {/* Modal Trigger Button */}
-      <Button
-        title="Dashboard"
+      {/* <Button
+        title="View Selection Counts"
         onPress={() => setModalVidCountVisible(true)}
       />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalCountVisible}
+        onRequestClose={() => setModalVidCountVisible(true)}
+      >
+        <View style={styles.modalView}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Video Selection Counts</Text>
+            {selectionVideoCounts.map((count, index) => (
+              <Text key={index} style={styles.modalItem}>
+                Video {index + 1}: {count} times
+              </Text>
+            ))}
+            <Button
+              title="Close"
+              onPress={() => setModalVidCountVisible(false)}
+            />
+          </View>
+        </View>
+      </Modal> */}
+      {/* Modal Display in text format end*/}
+      
+
+      <Pressable
+        onPress={() => setModalVidCountVisible(true)}
+      >
+        <Text style={{fontSize:20, color:'white', alignSelf:'center', backgroundColor:'#ff2800'}}>
+          Dashboard
+        </Text>
+      </Pressable>
+      {/*  Display Dashboard Start*/}
+
 
       {/* Modal with Pie Chart */}
       <Modal
@@ -267,13 +328,17 @@ export default function PostComp() {
             )}
             <Button
               title="Close"
-              onPress={() => setModalVidCountVisible(false)}
+              onPress={()=> handleEventSubmitVidCount(pieData)}
+              color="#4CAF50" // Green for submit
+              // onPress={() => setModalVidCountVisible(false)}
             />
           </View>
         </View>
       </Modal>
       {/* dipslay dashboard end */}
 
+
+      {/* Video select container START*/}
       <View style={styles.imagePayContainer}>
       {imagesPay.map((imagePay, index) => (
         <TouchableOpacity
@@ -300,7 +365,10 @@ export default function PostComp() {
                 // onPlaybatrue}tusUpdate={handlePlaybackStatusUpdate}            
           />  
       </View>
+      {/* Video select container END*/}
 
+
+      {/* Image Auto Scroll container -START */}
         <View>
           <ScrollView
             ref={scrollViewRef}
@@ -345,6 +413,7 @@ export default function PostComp() {
           </View>
         </View>
 
+
         <Modal visible={modalVisible} transparent onRequestClose={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
 
@@ -356,6 +425,8 @@ export default function PostComp() {
           <Image source={selectedPayImage ? selectedPayImage : selectedImage} style={styles.fullImage} />
           </View>
         </Modal>
+        {/* Image Auto Scroll container -END */}
+
 
       </ImageBackground>
       <View style={styles.latlong}>
@@ -437,6 +508,7 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     marginHorizontal: 5,
+    marginBottom: 10
   },
   coordText: {
     // color: '#ffca2b',
@@ -467,8 +539,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   fullImage: {
-    width: screenWidth * 0.9,
-    height: screenWidth * 0.9 * (100 / 100), // Maintain aspect ratio
+    // width: screenWidth * 0.9,
+    // height: screenWidth * 0.9 * (100 / 100), // Maintain aspect ratio
+    width:300,
+    height: 300, // Maintain aspect ratio
     borderRadius: 10,
   },
   video: {
@@ -483,7 +557,7 @@ const styles = StyleSheet.create({
   viewView:{
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 20, // Number, not string
+    // marginVertical: 20, // Number, not string
   },
   dashboard: {
     marginTop: 20,

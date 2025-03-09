@@ -36,6 +36,7 @@ export default function FireBaseAuthUserContextProvider(props){
       }));
   };
     let attendanceCol = collection(DB,'attendance');
+    let vidCountCol = collection(DB,'videocount');
 
     useEffect(() => {
       // Set up listener for authentication state changes.
@@ -120,9 +121,31 @@ export default function FireBaseAuthUserContextProvider(props){
         }
     }
 
-
-
-
+    // save count in db 
+    const createVidCount = async (formData) => {
+      try {
+        const user = AUTH.currentUser;
+        const promises = formData.map(async (item) => {
+          const { name, population } = item;
+          // console.log(`Name: ${name}, Count: ${population}`);
+          const docRef = doc(vidCountCol);
+          const vidCountData = {
+            status: 'current',
+            created_at: serverTimestamp(),
+            owner: user.uid,
+            name: name,
+            population: population,
+          };
+          await setDoc(docRef, vidCountData);
+          return vidCountData;
+        });
+        const results = await Promise.all(promises);
+        // console.log("All counts saved: ", results);
+        return results;
+      } catch (e) {
+        console.log("Error: ", e);
+      }
+    };
 
       /*Delete record*/
       const deleteRecord = async (docID) => {
@@ -219,7 +242,8 @@ export default function FireBaseAuthUserContextProvider(props){
           state,
           createAttendance,
           getAttendanceRecord,
-          deleteRecord
+          deleteRecord,
+          createVidCount
         }}>
             {props.children}
         </FirebaseContextStore.Provider>
